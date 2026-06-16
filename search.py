@@ -3,6 +3,8 @@ import torch
 import open_clip
 from PIL import Image
 from deep_translator import GoogleTranslator
+import pillow_heif
+pillow_heif.register_heif_opener()
 
 photos_dir = Path("photos")
 index_path = Path("index.pt")
@@ -43,7 +45,7 @@ else:
     print("Индексация фото...")
 
     for img_path in photos_dir.iterdir():
-        if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png"]:
+        if img_path.suffix.lower() not in [".jpg", ".jpeg", ".png", ".heic"]:
             continue
 
         print("processing:", img_path.name)
