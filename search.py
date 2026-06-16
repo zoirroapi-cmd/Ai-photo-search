@@ -2,7 +2,7 @@ from pathlib import Path
 import torch
 import open_clip
 from PIL import Image
-from transformers import pipeline
+from deep_translator import GoogleTranslator
 
 photos_dir = Path("photos")
 index_path = Path("index.pt")
@@ -17,26 +17,23 @@ device = "mps" if torch.backends.mps.is_available() else "cpu"
 print("Устройство:", device)
 
 model, _, preprocess = open_clip.create_model_and_transforms(
-    "ViT-L-14",
-    pretrained="laion2b_s32b_b82k"
+    "ViT-B-32",
+    pretrained="openai"
 )
 model = model.to(device)
 
 print("Модель загружена\n")
 
-translator = pipeline(
-    "translation",
-    model="Helsinki-NLP/opus-mt-ru-en"
-)
+
 
 if index_path.exists():
     print("Загружаем сохранённый индекс...")
-
+   
     saved = torch.load(index_path, map_location="cpu")
-
+   
     all_embeddings = saved["embeddings"].to(device)
     files = [Path(f) for f in saved["files"]]
-
+   
     print(f"Готово! Загружено {len(files)} фото\n")
 
 else:
@@ -66,7 +63,7 @@ else:
             print("indexed:", img_path.name)
 
         except Exception as e:
-            print("error:", img_path.name, e)
+            print("skipped:", img_path.name, "—", e)
 
     if not files:
         print("Нет фото для поиска")
@@ -83,7 +80,7 @@ else:
     )
 
     files = [Path(f) for f in files]
-
+  
     print(f"\nГотово! Проиндексировано {len(files)} фото")
     print("Индекс сохранён\n")
 
@@ -97,13 +94,14 @@ while True:
         break
 
     if any("\u0400" <= c <= "\u04FF" for c in query):
-        query = translator(query, max_length=64)[0]["translation_text"]
+        query = GoogleTranslator(source="ru", target="en").translate(query)
+        print("Перевод:", query)
 
     query = f"a photo of {query}, high quality, detailed"
 
     with torch.no_grad():
         text = open_clip.tokenize([query]).to(device)
-
+   
         text_emb = model.encode_text(text)
         text_emb = text_emb / text_emb.norm(dim=-1, keepdim=True)
 
@@ -113,7 +111,7 @@ while True:
     values, indices = torch.topk(scores, k=top_k)
 
     print("\nРезультаты:")
-
+    
     for score, idx in zip(values.tolist(), indices.tolist()):
         print(f"  {files[idx].name}  score: {score:.3f}")
 
