@@ -1,3 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
 photos/
+clusters/
+people_test/
 index.pt
+faces.pkl
+*.HEIC
+*.jpg
+*.jpeg
+*.png
 .DS_Store
