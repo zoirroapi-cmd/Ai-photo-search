@@ -1,0 +1,12 @@
+open_clip_torch==2.20.0
+fastapi
+uvicorn
+python-multipart
+deep-translator
+pillow-heif
+face_recognition
+torch
+torchvision
+Pillow
+numpy
+scikit-learn

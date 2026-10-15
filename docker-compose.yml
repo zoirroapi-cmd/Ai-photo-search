@@ -1,0 +1,11 @@
+services:
+  ai-photo-search:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./photos:/app/photos
+      - ./people:/app/people
+      - ./index.pt:/app/index.pt
+      - ./faces.pkl:/app/faces.pkl
+    restart: unless-stopped
